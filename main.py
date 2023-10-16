@@ -159,7 +159,7 @@ def process_params(packet,id,port):
     source=':'.join([source[i:i+2] for i in range(0, len(source), 2)])
     destination=':'.join([destination[i:i+2] for i in range(0, len(destination), 2)])
     length=len(packet)
-    ethernet_type=ethernet_type_function(packet)
+    ethernet_type=frame_type_function(packet)
     
     general_frame=generalPacket(id,length,ethernet_type,source,destination,packet)
     
@@ -176,10 +176,10 @@ def process_params(packet,id,port):
    
     
     
-def ethernet_type_function(packet):
-    ethernet_part_length=int(bytes(packet[12:14]).hex(),16)
+def frame_type_function(packet):
+    frame_part_length=int(bytes(packet[12:14]).hex(),16)
     
-    if ethernet_part_length >= 1500:     
+    if frame_part_length >= 1500:     
         ethernet_type='Ethernet II'
         return ethernet_type
 
@@ -206,10 +206,10 @@ def final_resolve(general_packet,packet,port):
         final_frame=ieeeRaw(general_packet,packet,yaml_data)
         yaml_creator(final_frame,packet,port)
     elif general_packet.packet_frame_type == 'Ethernet II':
-        ethernet_part_length=int(bytes(packet[12:14]).hex(),16)
+        frame_part_length=int(bytes(packet[12:14]).hex(),16)
 
         for i in yaml_data['ether_type']:  
-            if i == ethernet_part_length:               #? Choosing an ether_type based on 13th-14th byte
+            if i == frame_part_length:               #? Choosing an ether_type based on 13th-14th byte
                 ethernet_protocol=yaml_data['ether_type'][i]
                 final_frame=ethernetTwo(general_packet,ethernet_protocol,packet)
                 break
@@ -218,9 +218,10 @@ def final_resolve(general_packet,packet,port):
         
         
         if final_frame.protocol == 'ipv4':
-            yaml_creator(solve_inner_protocol(final_frame,packet,yaml_data,port),packet,port)
+            yaml_creator(solver_inner_protocol(final_frame,packet,yaml_data,port),packet,port)
         elif final_frame.protocol == 'arp' and port=='arp':
             arp_check_comm(final_frame,packet,yaml_data)
+            yaml_creator(final_frame,packet,port)
         else:
             yaml_creator(final_frame,packet,port)
     else:
@@ -228,7 +229,7 @@ def final_resolve(general_packet,packet,port):
         yaml_creator(final_frame,packet,port)
     return final_frame
 
-def solve_inner_protocol(final_frame,packet,yaml_data,port):
+def solver_inner_protocol(final_frame,packet,yaml_data,port):
     
     ip_header_len=14+int(bytes(packet[14:15]).hex()[1:2],16)*4
     
@@ -911,14 +912,33 @@ def count_ip_nodes(analyzed_packet,all_nodes):
     return all_nodes
 
 def main():
+    with open('./types.yaml','r') as file:
+        yaml_data=yaml.safe_load(file)
     
-    file_name='trace-25.pcap'
+    file_name='trace-26.pcap'
     project_name='PKS2023/24'
     pcap_file = './test_pcap_files/vzorky_pcap_na_analyzu/'+file_name
 
     args = parser.parse_args()
+    port_true=False
     port = args.port
-
+    port = 'pooper'
+    
+    for data in yaml_data['ipv4_protocol']:
+        if yaml_data['ipv4_protocol'][data]==port:
+            port_true=True
+    for data in yaml_data['udp_protocol']:
+        if yaml_data['udp_protocol'][data]==port:
+            port_true=True
+    for data in yaml_data['tcp_protocol']:
+        if yaml_data['tcp_protocol'][data]==port:
+            port_true=True
+    for data in yaml_data['ether_type']:
+        if yaml_data['ether_type'][data]==port:
+            port_true=True
+            
+    if port_true==False:
+        exit('Neznámy údaj, skús to znova!')
 
     packets= rdpcap(pcap_file) 
         
