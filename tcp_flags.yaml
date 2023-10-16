@@ -1,0 +1,12 @@
+all_flags:
+  1: FIN
+  2: SYN
+  4: RST
+  8: PSH
+  10: ACK
+  11: FIN, ACK
+  12: SYN, ACK
+  14: RST, ACK
+  18: PSH, ACK
+  19: FIN, PSH, ACK
+  20: URG

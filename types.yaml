@@ -1,0 +1,81 @@
+ether_type:
+  2048: ipv4
+  2054: arp
+  34525: ipv6
+  36864: ectp
+  35020: lldp
+sap:
+  66: stp
+  224: ipx
+  240: netbios
+pid:
+  8192: cdp
+  8196: dtp
+  267: pvstp+
+  32923: appletalk
+tcp_protocol:
+  20: ftp-data
+  21: ftp-control
+  22: ssh
+  23: telnet
+  25: smtp
+  53: dns
+  80: http
+  110: pop3
+  119: nntp
+  137: netbios-ns
+  139: netbios-ssn
+  143: imap
+  162: snmp-trap
+  179: bgp
+  389: ldap
+  443: https
+  514: syslog
+  993: tlsv1
+  17500: db-lsp-disc
+udp_protocol:
+  37: time
+  53: dns
+  67: dhcp
+  68: dhcp
+  69: tftp
+  80: http
+  137: netbios-ns
+  138: netbios-dgm
+  161: snmp
+  162: snmp-trap
+  443: https
+  514: syslog
+  520: rip
+  1900: ssdp
+  5353: mdns
+  17500: db-lsp-disc
+  33434: traceroute
+ipv4_protocol:
+  1: icmp
+  2: igmp
+  6: tcp
+  17: udp
+  103: pim
+icmp_code:
+  0: Echo Reply
+  3: Destination Unreachable
+  4: Source Quench
+  5: Redirect
+  8: Echo Request
+  9: Router Advertisiment
+  10: Router Selection
+  11: Time Exceeded
+  12: Parameter Problem
+  13: Timestamp
+  14: Timestamp Reply
+  15: Information Request
+  16: Information Reply
+  17: Address Mask Request
+  18: Address Mask Reply
+  30: Traceroute
+arp_opcode:
+  1: Request
+  2: Reply
+
+  
