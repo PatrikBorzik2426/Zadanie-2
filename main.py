@@ -26,20 +26,20 @@ class generalPacket:
     packet_id=None
     packet_length=None
     packet_length_medium=None
-    packet_ether_type=None
+    packet_frame_type=None
     source_mac=None
     destination_mac=None
     
     tcp_flag=''
     
-    def __init__(self,packet_id,packet_length,packet_ether_type,source_mac,destination_mac,packet):
+    def __init__(self,packet_id,packet_length,packet_frame_type,source_mac,destination_mac,packet):
         self.packet_id=packet_id
         self.packet_length=packet_length
         if packet_length <= 60:
             self.packet_length_medium=64
         else:
             self.packet_length_medium=self.packet_length+4
-        self.packet_ether_type=packet_ether_type
+        self.packet_frame_type=packet_frame_type
         self.source_mac=source_mac
         self.destination_mac=destination_mac
 
@@ -48,7 +48,7 @@ class ieeetLlcSnap(generalPacket):
     pid=None
     
     def __init__(self,general_packet,packet,yaml_data):
-        super().__init__(general_packet.packet_id,general_packet.packet_length,general_packet.packet_ether_type,general_packet.source_mac,general_packet.destination_mac,packet)
+        super().__init__(general_packet.packet_id,general_packet.packet_length,general_packet.packet_frame_type,general_packet.source_mac,general_packet.destination_mac,packet)
         self.resolve(packet,yaml_data)
         
     def resolve(self,packet,yaml_data):
@@ -71,7 +71,7 @@ class ieeeLlc(generalPacket):
     sap=None
     
     def __init__(self,general_packet,packet,yaml_data):
-        super().__init__(general_packet.packet_id,general_packet.packet_length,general_packet.packet_ether_type,general_packet.source_mac,general_packet.destination_mac,packet)
+        super().__init__(general_packet.packet_id,general_packet.packet_length,general_packet.packet_frame_type,general_packet.source_mac,general_packet.destination_mac,packet)
         self.resolve(packet,yaml_data)
 
         
@@ -90,7 +90,7 @@ class ieeeLlc(generalPacket):
 class ieeeRaw(generalPacket):
     protocol=None
     def __init__(self,general_packet,packet,yaml_data):
-        super().__init__(general_packet.packet_id,general_packet.packet_length,general_packet.packet_ether_type,general_packet.source_mac,general_packet.destination_mac,packet)
+        super().__init__(general_packet.packet_id,general_packet.packet_length,general_packet.packet_frame_type,general_packet.source_mac,general_packet.destination_mac,packet)
         
    
 class ethernetTwo(generalPacket):
@@ -103,7 +103,7 @@ class ethernetTwo(generalPacket):
     destination_port=None
     
     def __init__(self,general_packet,protocol,packet):
-        super().__init__(general_packet.packet_id,general_packet.packet_length,general_packet.packet_ether_type,general_packet.source_mac,general_packet.destination_mac,packet)
+        super().__init__(general_packet.packet_id,general_packet.packet_length,general_packet.packet_frame_type,general_packet.source_mac,general_packet.destination_mac,packet)
         self.protocol=protocol
         self.resolve(packet)
         
@@ -199,13 +199,13 @@ def final_resolve(general_packet,packet,port):
     with open('./types.yaml','r') as file:
         yaml_data=yaml.safe_load(file)
     
-    if general_packet.packet_ether_type == 'IEEE 802.3 LLC & SNAP':
+    if general_packet.packet_frame_type == 'IEEE 802.3 LLC & SNAP':
         final_frame=ieeetLlcSnap(general_packet,packet,yaml_data)
         yaml_creator(final_frame,packet,port)
-    elif general_packet.packet_ether_type == 'IEEE 802.3 RAW':
+    elif general_packet.packet_frame_type == 'IEEE 802.3 RAW':
         final_frame=ieeeRaw(general_packet,packet,yaml_data)
         yaml_creator(final_frame,packet,port)
-    elif general_packet.packet_ether_type == 'Ethernet II':
+    elif general_packet.packet_frame_type == 'Ethernet II':
         ethernet_part_length=int(bytes(packet[12:14]).hex(),16)
 
         for i in yaml_data['ether_type']:  
@@ -592,7 +592,7 @@ def tftp_yaml_creator():
                 'frame_number': inner_com.packet_id,
                 'len_frame_pcap': inner_com.packet_length,
                 'len_frame_medium': inner_com.packet_length_medium,
-                'frame_type': inner_com.packet_ether_type,
+                'frame_type': inner_com.packet_frame_type,
                 'src_mac': inner_com.source_mac,
                 'dst_mac': inner_com.destination_mac,
             }
@@ -653,7 +653,7 @@ def arp_yaml_creator():
                     'frame_number': com.packet_id,
                     'len_frame_pcap': com.packet_length,
                     'len_frame_medium': com.packet_length_medium,
-                    'frame_type': com.packet_ether_type,
+                    'frame_type': com.packet_frame_type,
                     'src_mac': com.sender_mac,
                     'dst_mac': com.target_mac,
                 }
@@ -672,7 +672,7 @@ def arp_yaml_creator():
                         'frame_number': com.packet_id,
                         'len_frame_pcap': com.packet_length,
                         'len_frame_medium': com.packet_length_medium,
-                        'frame_type': com.packet_ether_type,
+                        'frame_type': com.packet_frame_type,
                         'src_mac': com.sender_mac,
                         'dst_mac': com.target_mac,
                     }
@@ -691,7 +691,7 @@ def arp_yaml_creator():
                         'frame_number': com.packet_id,
                         'len_frame_pcap': com.packet_length,
                         'len_frame_medium': com.packet_length_medium,
-                        'frame_type': com.packet_ether_type,
+                        'frame_type': com.packet_frame_type,
                         'src_mac': com.sender_mac,
                         'dst_mac': com.target_mac,
                     }
@@ -755,7 +755,7 @@ def icmp_yaml_creator(port):
                     'frame_number': inner_com.packet_id,
                     'len_frame_pcap': inner_com.packet_length,
                     'len_frame_medium': inner_com.packet_length_medium,
-                    'frame_type': inner_com.packet_ether_type,
+                    'frame_type': inner_com.packet_frame_type,
                     'src_mac': inner_com.source_mac,
                     'dst_mac': inner_com.destination_mac,
                 }
@@ -812,13 +812,13 @@ def icmp_yaml_creator(port):
 def yaml_creator(analyzed_packet,packet,port):
    
 
-    if port == 'all' or (analyzed_packet.packet_ether_type == 'Ethernet II' and (analyzed_packet.protocol == port or analyzed_packet.inner_protocol==port or analyzed_packet.inner_protocol_detail==port)):
+    if port == 'all' or (analyzed_packet.packet_frame_type == 'Ethernet II' and (analyzed_packet.protocol == port or analyzed_packet.inner_protocol==port or analyzed_packet.inner_protocol_detail==port)):
 
             data={
                 'frame_number': analyzed_packet.packet_id,
                 'len_frame_pcap': analyzed_packet.packet_length,
                 'len_frame_medium': analyzed_packet.packet_length_medium,
-                'frame_type': analyzed_packet.packet_ether_type,
+                'frame_type': analyzed_packet.packet_frame_type,
                 'src_mac': analyzed_packet.source_mac,
                 'dst_mac': analyzed_packet.destination_mac,
             }
@@ -827,7 +827,7 @@ def yaml_creator(analyzed_packet,packet,port):
                 data.update({'pid': analyzed_packet.pid})
             elif hasattr(analyzed_packet,'sap'):
                 data.update({'sap': analyzed_packet.sap})
-            elif analyzed_packet.packet_ether_type == 'Ethernet II':
+            elif analyzed_packet.packet_frame_type == 'Ethernet II':
                 data.update({'ether_type': analyzed_packet.protocol})
                 data.update({'src_ip': analyzed_packet.source_ip})
                 data.update({'dst_ip': analyzed_packet.destination_ip})
@@ -858,7 +858,7 @@ def tcp_yaml_creator(port):
                     'frame_number': inner_com.packet_id,
                     'len_frame_pcap': inner_com.packet_length,
                     'len_frame_medium': inner_com.packet_length_medium,
-                    'frame_type': inner_com.packet_ether_type,
+                    'frame_type': inner_com.packet_frame_type,
                     'src_mac': inner_com.source_mac,
                     'dst_mac': inner_com.destination_mac,
                 }
@@ -899,7 +899,7 @@ def tcp_yaml_creator(port):
             i+=1
 
 def count_ip_nodes(analyzed_packet,all_nodes):
-    if analyzed_packet.packet_ether_type == 'Ethernet II':
+    if analyzed_packet.packet_frame_type == 'Ethernet II':
         if all_nodes.get(analyzed_packet.source_ip):
             all_nodes.update({
                 analyzed_packet.source_ip:all_nodes.get(analyzed_packet.source_ip)+1
